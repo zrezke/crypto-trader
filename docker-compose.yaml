@@ -1,0 +1,10 @@
+version: "3.8"
+services:
+  trader :
+    build: ./src/trader/
+  db:
+    build: ./src/DB/
+    volumes:
+      - ./src/DB/
+    ports:
+      - "5432:5432"

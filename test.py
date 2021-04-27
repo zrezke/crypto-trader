@@ -1,29 +1,52 @@
 import requests
+import pandas as pd
+import ta
+from ta.utils import dropna
+from ta import add_all_ta_features
 
 BASE_URL = "https://api.binance.com/"
+SERVER_TIME_ENDPOINT = BASE_URL + "api/v3/time"
 CANDLE_DATA_ENDPOINT = BASE_URL + "api/v3/klines"
 
+serverTime = requests.get(SERVER_TIME_ENDPOINT).json()['serverTime']
+
+DATA_LIMIT = 518
 args = {
-    "symbol": "ETHBTC",
-    "interval": "1h"
+    "symbol": "ADABTC",
+    "interval": "1m",
 }
 
 request = requests.get(CANDLE_DATA_ENDPOINT, params=args)
-print(request.json())
+import TA
+data = request.json()
+def create_objects(data):
+    return TA.Data(data)
 
-'''
-Here is this Bollinger Band® formula:
+data = [[float(val) for val in item] for item in data]
 
-\begin{aligned} &\text{BOLU} = \text {MA} ( \text {TP}, n ) + m * \sigma [ \text {TP}, n ] \\ &\text{BOLD} = \text {MA} ( \text {TP}, n ) - m * \sigma [ \text {TP}, n ] \\ &\textbf{where:} \\ &\text {BOLU} = \text {Upper Bollinger Band} \\ &\text {BOLD} = \text {Lower Bollinger Band} \\ &\text {MA} = \text {Moving average} \\ &\text {TP (typical price)} = ( \text{High} + \text{Low} + \text{Close} ) \div 3 \\ &n = \text {Number of days in smoothing period (typically 20)} \\ &m = \text {Number of standard deviations (typically 2)} \\ &\sigma [ \text {TP}, n ] = \text {Standard Deviation over last } n \text{ periods of TP} \\ \end{aligned} 
-​	  
-BOLU=MA(TP,n)+m∗σ[TP,n]
-BOLD=MA(TP,n)−m∗σ[TP,n]
-where:
-BOLU=Upper Bollinger Band
-BOLD=Lower Bollinger Band
-MA=Moving average
-TP (typical price)=(High+Low+Close)÷3
-n=Number of days in smoothing period (typically 20)
-m=Number of standard deviations (typically 2)
-σ[TP,n]=Standard Deviation over last n periods of TP
+df = pd.DataFrame(data, columns=["Timestamp", "Open", "High",
+ "Low", "Close", "Volume", "close time", "qav", "n of trades", "tbbav", "tbqav", "ignore"])
+df.to_csv("lmao.csv")
+
+rsi = ta.momentum.rsi(df["Close"], fillna=True)
+sRSI = ta.momentum.stochrsi(df["Close"])
+print(rsi.iloc[-1], sRSI.iloc[-1])
 '''
+df = add_all_ta_features(
+    df, open="Open", high="High", low="Low", close="Close", volume="Volume")
+'''
+data_objs = [TA.Data(x) for x in data]
+
+avg_gain = TA.average_gain(data_objs)
+avg_loss = TA.average_loss(data_objs)
+
+MA = TA.simple_moving_average([x.close_price for x in data_objs])
+RSI = TA.rsi(avg_gain, avg_loss)
+
+print("Avg. GAIn: ",avg_gain, "AVG. loss: ", avg_loss, "MA: ", MA, "RSI: ", RSI)
+
+DEFAULT_RSI_PERIOD = 100
+RSI_LOOKBACK_PERIOD =14
+
+min_RSI = 101
+max_RSI = 0
