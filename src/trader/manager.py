@@ -1,0 +1,2 @@
+
+KLINE_INTERVAL = "1m"
