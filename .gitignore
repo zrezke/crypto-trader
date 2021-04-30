@@ -2,7 +2,11 @@ __pycache__
 *.csv
 *.xlsx
 <<<<<<< HEAD
+<<<<<<< HEAD
 secret.json
+=======
+*.xd
+>>>>>>> f5466f67e129dd0537bfa60ceb71aa696249ee22
 =======
 *.xd
 >>>>>>> f5466f67e129dd0537bfa60ceb71aa696249ee22
