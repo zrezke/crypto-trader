@@ -1,6 +1,5 @@
 import ta
 import pandas as pd
-import requests
 
 
 def build(kline_data) -> pd.DataFrame:
